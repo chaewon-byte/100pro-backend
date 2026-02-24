@@ -20,9 +20,7 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """앱 시작 시 .env 로드 → DB 초기화 → 스케줄러 시작. 종료 시 스케줄러·Redis 정리."""
-    load_env()
-
+    """앱 시작 시 DB 초기화 → 스케줄러 시작. 종료 시 스케줄러·Redis 정리."""
     from app.core.database import init_db
     from app.core.redis import close_redis
     from app.infrastructure.task_miss import TaskMissScheduler
