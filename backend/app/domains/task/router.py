@@ -32,7 +32,7 @@ def list_my_tasks(
 ):
     """자신의 활성 할 일 조회 (보관되지 않은 것)"""
     tasks = db.query(models.Task).filter(
-        models.Task.user_id == str(current_user.id),
+        models.Task.user_id == current_user.id,
         models.Task.is_archived == False
     ).order_by(models.Task.due_date.asc()).all()
     return tasks
@@ -44,7 +44,7 @@ def list_archived_tasks(
 ):
     """보관함 조회"""
     tasks = db.query(models.Task).filter(
-        models.Task.user_id == str(current_user.id),
+        models.Task.user_id == current_user.id,
         models.Task.is_archived == True
     ).order_by(models.Task.due_date.desc()).all()
     return tasks
@@ -57,7 +57,7 @@ def list_past_incomplete_tasks(
     """과거 미완료 할 일 조회"""
     start_of_day, _ = get_today_bounds()
     tasks = db.query(models.Task).filter(
-        models.Task.user_id == str(current_user.id),
+        models.Task.user_id == current_user.id,
         models.Task.is_archived == False,
         models.Task.due_date < start_of_day,
         models.Task.status != models.TaskStatus.COMPLETED
@@ -84,7 +84,7 @@ def create_task(
 
     # [PRO-B-34] 일일 5개 제한 차단
     c_tasks_today = db.query(func.count(models.Task.id)).filter(
-        models.Task.user_id == str(current_user.id),
+        models.Task.user_id == current_user.id,
         models.Task.due_date >= start_of_day,
         models.Task.due_date < end_of_day
     ).scalar()
@@ -99,7 +99,7 @@ def create_task(
         title=task_data.title,
         description=task_data.description,
         due_date=due_date_naive,
-        user_id=str(current_user.id),
+        user_id=current_user.id,
         status=models.TaskStatus.PENDING
     )
     db.add(new_task)
@@ -116,7 +116,7 @@ def update_task(
 ):
     task = db.query(models.Task).filter(
         models.Task.id == task_id,
-        models.Task.user_id == str(current_user.id)
+        models.Task.user_id == current_user.id
     ).first()
     
     if not task:
@@ -143,7 +143,7 @@ def delete_task(
 ):
     task = db.query(models.Task).filter(
         models.Task.id == task_id,
-        models.Task.user_id == str(current_user.id)
+        models.Task.user_id == current_user.id
     ).first()
     
     if not task:
@@ -164,7 +164,7 @@ def batch_action_past_tasks(
 
     tasks = db.query(models.Task).filter(
         models.Task.id.in_(action_data.task_ids),
-        models.Task.user_id == str(current_user.id)
+        models.Task.user_id == current_user.id
     ).all()
 
     if not tasks:
@@ -191,13 +191,13 @@ def get_productivity_stats(
     start_of_day, end_of_day = get_today_bounds()
     
     total_today = db.query(func.count(models.Task.id)).filter(
-        models.Task.user_id == str(current_user.id),
+        models.Task.user_id == current_user.id,
         models.Task.due_date >= start_of_day,
         models.Task.due_date < end_of_day
     ).scalar()
     
     completed_today = db.query(func.count(models.Task.id)).filter(
-        models.Task.user_id == str(current_user.id),
+        models.Task.user_id == current_user.id,
         models.Task.due_date >= start_of_day,
         models.Task.due_date < end_of_day,
         models.Task.status == models.TaskStatus.COMPLETED
